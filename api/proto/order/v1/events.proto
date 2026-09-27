@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package order.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/order/v1;orderv1";
+
+import "order/v1/order.proto";
+import "common/v1/common.proto";
+
+message OrderCreated {
+  string order_id = 1;
+  string user_id = 2;
+  repeated order.v1.OrderItem items = 3;
+  common.v1.Money total_amount = 4;
+}
+
+message OrderConfirmed {
+  string order_id = 1;
+}
+
+message OrderCancelled {
+  string order_id = 1;
+  order.v1.CancelReason reason = 2;
+}
+
+message PaymentRequested {
+  string order_id = 1;
+  common.v1.Money amount = 2;
+}

@@ -1,5 +1,10 @@
 version: '3'
 
+dotenv: ['.env']
+
+vars:
+  USER_DB_DSN: postgres://{{.USER_DB_USER}}:{{.USER_DB_PASSWORD}}@localhost:{{.USER_DB_PORT}}/{{.USER_DB_NAME}}?sslmode=disable
+
 tasks:
   gen-proto:
     desc: Генерирует Go-код из всех .proto файлов с помощью Buf
@@ -7,3 +12,38 @@ tasks:
       - rm -rf gen/go
       - mkdir gen/go
       - buf generate
+
+  docker-up:
+    desc: Поднимает локальные контейнеры (Postgres и т.д.) в фоне
+    cmds:
+      - docker compose up -d
+
+  docker-down:
+    desc: Останавливает и удаляет контейнеры (данные в volume сохраняются)
+    cmds:
+      - docker compose down
+
+  docker-down-v:
+    desc: Останавливает контейнеры и удаляет volume — полный сброс данных БД
+    cmds:
+      - docker compose down -v
+
+  docker-logs:
+    desc: Стримит логи всех контейнеров
+    cmds:
+      - docker compose logs -f
+
+  migrate-user-up:
+    desc: Накатывает все миграции user-сервиса
+    cmds:
+      - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" up
+
+  migrate-user-down:
+    desc: Откатывает последнюю миграцию user-сервиса
+    cmds:
+      - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" down
+
+  migrate-user-status:
+    desc: Показывает статус миграций user-сервиса
+    cmds:
+      - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" status

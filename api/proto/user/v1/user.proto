@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/user/v1;userv1";
+
+import "google/protobuf/timestamp.proto";
+
+
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  USER_ROLE_CUSTOMER = 1;
+  USER_ROLE_SELLER = 2;
+  USER_ROLE_ADMIN = 3;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string phone = 3;
+  string full_name = 4;
+  UserRole role = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterResponse {
+  string user_id = 1;
+}
+
+message AuthenticateRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  string user_id = 1;
+  UserRole role = 2;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+service UserService {
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc Authenticate (AuthenticateRequest) returns (AuthenticateResponse);
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+}

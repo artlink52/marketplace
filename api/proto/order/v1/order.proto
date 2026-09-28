@@ -10,9 +10,8 @@ import "google/protobuf/timestamp.proto";
 
 message OrderItem {
   string product_id = 1;
-  string sku = 2;
-  int32 quantity = 3;
-  common.v1.Money unit_price = 4;
+  int32 quantity = 2;
+  common.v1.Money unit_price = 3;
 }
 
 enum OrderStatus {

@@ -192,3 +192,24 @@ Payment получает `payment.requested` и:
 - **Стейт-машина заказа.** Переход статуса выполняется, только если текущий статус ожидаемый. События, пришедшие повторно или не по порядку, игнорируются.
 - **Идемпотентность на входе и при оплате.** `Idempotency-Key` защищает от дублей заказа, `order_id` — от двойного списания денег.
 - **Единая точка управления.** Inventory слушает только события Order, а не Payment. Поэтому любая отмена заказа, по любой причине, корректно снимает резерв.
+
+# 3. Остальные сценарии (синхронное чтение через Gateway)
+
+Раздел 2 описывает только один флоу — сагу оформления заказа, где Gateway напрямую общается лишь с Order, а всё остальное происходит асинхронно через Kafka между Order, Inventory и Payment. Но по общей схеме (раздел 1) Gateway связан gRPC-каналом со всеми сервисами кроме Notification — эти связи используются в остальных, не связанных с сагой сценариях маркетплейса.
+
+Правило то же, что и в разделе 1: **только чтение** (и простые CRUD-команды внутри своего сервиса, не меняющие чужое состояние) синхронно через gRPC, без сцепленных цепочек записи между сервисами.
+
+| REST (Gateway) | gRPC-вызов | Сервис |
+|---|---|---|
+| `POST /auth/register` | `UserService.Register` | user |
+| `POST /auth/login` | `UserService.Authenticate` | user |
+| `GET /users/{id}` | `UserService.GetUser` | user |
+| `GET /products`, `GET /products/{id}` | `CatalogService.ListProducts` / `GetProduct` | catalog |
+| `POST /products`, `PATCH /products/{id}` (продавец) | `CatalogService.CreateProduct` / `UpdateProduct` / `ArchiveProduct` | catalog |
+| `GET /search?q=...` | `SearchService.SearchProducts` | search |
+| `GET /products/{id}/stock` | `InventoryService.GetStock` | inventory |
+| `GET /payments/{order_id}` | `PaymentService.GetPayment` | payment |
+| `GET /admin/analytics/orders-summary` | `AnalyticsService.GetOrdersSummary` | analytics |
+| `GET /admin/analytics/top-products` | `AnalyticsService.GetTopProducts` | analytics |
+
+Notification в этой таблице не участвует — он не принимает вызовов от Gateway вообще, только консьюмит события из Kafka (welcome/подтверждение заказа/отмена и т.п.) и рассылает email/push.

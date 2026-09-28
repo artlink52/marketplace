@@ -40,3 +40,15 @@ message Payment {
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
 }
+
+message GetPaymentRequest {
+  string order_id = 1;
+}
+
+message GetPaymentResponse {
+  Payment payment = 1;
+}
+
+service PaymentService {
+  rpc GetPayment (GetPaymentRequest) returns (GetPaymentResponse);
+}

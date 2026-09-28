@@ -31,7 +31,19 @@ message Reservation {
   string order_id = 2;
   ReservationStatus status = 3;
   repeated ReservationItem items = 4;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp expired_at = 8;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp expired_at = 6;
+}
+
+message GetStockRequest {
+  string product_id = 1;
+}
+
+message GetStockResponse {
+  StockItem stock_item = 1;
+}
+
+service InventoryService {
+  rpc GetStock (GetStockRequest) returns (GetStockResponse);
 }
 

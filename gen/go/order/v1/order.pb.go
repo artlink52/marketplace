@@ -133,9 +133,8 @@ func (CancelReason) EnumDescriptor() ([]byte, []int) {
 type OrderItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ProductId     string                 `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	Sku           string                 `protobuf:"bytes,2,opt,name=sku,proto3" json:"sku,omitempty"`
-	Quantity      int32                  `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	UnitPrice     *v1.Money              `protobuf:"bytes,4,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
+	Quantity      int32                  `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	UnitPrice     *v1.Money              `protobuf:"bytes,3,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -173,13 +172,6 @@ func (*OrderItem) Descriptor() ([]byte, []int) {
 func (x *OrderItem) GetProductId() string {
 	if x != nil {
 		return x.ProductId
-	}
-	return ""
-}
-
-func (x *OrderItem) GetSku() string {
-	if x != nil {
-		return x.Sku
 	}
 	return ""
 }
@@ -554,14 +546,13 @@ var File_order_v1_order_proto protoreflect.FileDescriptor
 
 const file_order_v1_order_proto_rawDesc = "" +
 	"\n" +
-	"\x14order/v1/order.proto\x12\border.v1\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x89\x01\n" +
+	"\x14order/v1/order.proto\x12\border.v1\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"w\n" +
 	"\tOrderItem\x12\x1d\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\tR\tproductId\x12\x10\n" +
-	"\x03sku\x18\x02 \x01(\tR\x03sku\x12\x1a\n" +
-	"\bquantity\x18\x03 \x01(\x05R\bquantity\x12/\n" +
+	"product_id\x18\x01 \x01(\tR\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x02 \x01(\x05R\bquantity\x12/\n" +
 	"\n" +
-	"unit_price\x18\x04 \x01(\v2\x10.common.v1.MoneyR\tunitPrice\"\xf2\x02\n" +
+	"unit_price\x18\x03 \x01(\v2\x10.common.v1.MoneyR\tunitPrice\"\xf2\x02\n" +
 	"\x05Order\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12-\n" +

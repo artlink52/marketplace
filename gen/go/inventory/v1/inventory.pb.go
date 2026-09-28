@@ -195,8 +195,8 @@ type Reservation struct {
 	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	Status        ReservationStatus      `protobuf:"varint,3,opt,name=status,proto3,enum=inventory.v1.ReservationStatus" json:"status,omitempty"`
 	Items         []*ReservationItem     `protobuf:"bytes,4,rep,name=items,proto3" json:"items,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	ExpiredAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ExpiredAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -273,6 +273,94 @@ func (x *Reservation) GetExpiredAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type GetStockRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProductId     string                 `protobuf:"bytes,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStockRequest) Reset() {
+	*x = GetStockRequest{}
+	mi := &file_inventory_v1_inventory_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStockRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStockRequest) ProtoMessage() {}
+
+func (x *GetStockRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_inventory_v1_inventory_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStockRequest.ProtoReflect.Descriptor instead.
+func (*GetStockRequest) Descriptor() ([]byte, []int) {
+	return file_inventory_v1_inventory_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetStockRequest) GetProductId() string {
+	if x != nil {
+		return x.ProductId
+	}
+	return ""
+}
+
+type GetStockResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StockItem     *StockItem             `protobuf:"bytes,1,opt,name=stock_item,json=stockItem,proto3" json:"stock_item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStockResponse) Reset() {
+	*x = GetStockResponse{}
+	mi := &file_inventory_v1_inventory_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStockResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStockResponse) ProtoMessage() {}
+
+func (x *GetStockResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_inventory_v1_inventory_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStockResponse.ProtoReflect.Descriptor instead.
+func (*GetStockResponse) Descriptor() ([]byte, []int) {
+	return file_inventory_v1_inventory_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetStockResponse) GetStockItem() *StockItem {
+	if x != nil {
+		return x.StockItem
+	}
+	return nil
+}
+
 var File_inventory_v1_inventory_proto protoreflect.FileDescriptor
 
 const file_inventory_v1_inventory_proto_rawDesc = "" +
@@ -293,15 +381,23 @@ const file_inventory_v1_inventory_proto_rawDesc = "" +
 	"\x06status\x18\x03 \x01(\x0e2\x1f.inventory.v1.ReservationStatusR\x06status\x123\n" +
 	"\x05items\x18\x04 \x03(\v2\x1d.inventory.v1.ReservationItemR\x05items\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"expired_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt*\xb9\x01\n" +
+	"expired_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt\"0\n" +
+	"\x0fGetStockRequest\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x01 \x01(\tR\tproductId\"J\n" +
+	"\x10GetStockResponse\x126\n" +
+	"\n" +
+	"stock_item\x18\x01 \x01(\v2\x17.inventory.v1.StockItemR\tstockItem*\xb9\x01\n" +
 	"\x11ReservationStatus\x12\"\n" +
 	"\x1eRESERVATION_STATUS_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19RESERVATION_STATUS_ACTIVE\x10\x01\x12 \n" +
 	"\x1cRESERVATION_STATUS_COMMITTED\x10\x02\x12\x1f\n" +
 	"\x1bRESERVATION_STATUS_RELEASED\x10\x03\x12\x1e\n" +
-	"\x1aRESERVATION_STATUS_EXPIRED\x10\x04BBZ@github.com/artlink52/marketplace/gen/go/inventory/v1;inventoryv1b\x06proto3"
+	"\x1aRESERVATION_STATUS_EXPIRED\x10\x042]\n" +
+	"\x10InventoryService\x12I\n" +
+	"\bGetStock\x12\x1d.inventory.v1.GetStockRequest\x1a\x1e.inventory.v1.GetStockResponseBBZ@github.com/artlink52/marketplace/gen/go/inventory/v1;inventoryv1b\x06proto3"
 
 var (
 	file_inventory_v1_inventory_proto_rawDescOnce sync.Once
@@ -316,24 +412,29 @@ func file_inventory_v1_inventory_proto_rawDescGZIP() []byte {
 }
 
 var file_inventory_v1_inventory_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_inventory_v1_inventory_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_inventory_v1_inventory_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_inventory_v1_inventory_proto_goTypes = []any{
 	(ReservationStatus)(0),        // 0: inventory.v1.ReservationStatus
 	(*StockItem)(nil),             // 1: inventory.v1.StockItem
 	(*ReservationItem)(nil),       // 2: inventory.v1.ReservationItem
 	(*Reservation)(nil),           // 3: inventory.v1.Reservation
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*GetStockRequest)(nil),       // 4: inventory.v1.GetStockRequest
+	(*GetStockResponse)(nil),      // 5: inventory.v1.GetStockResponse
+	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
 }
 var file_inventory_v1_inventory_proto_depIdxs = []int32{
 	0, // 0: inventory.v1.Reservation.status:type_name -> inventory.v1.ReservationStatus
 	2, // 1: inventory.v1.Reservation.items:type_name -> inventory.v1.ReservationItem
-	4, // 2: inventory.v1.Reservation.created_at:type_name -> google.protobuf.Timestamp
-	4, // 3: inventory.v1.Reservation.expired_at:type_name -> google.protobuf.Timestamp
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	6, // 2: inventory.v1.Reservation.created_at:type_name -> google.protobuf.Timestamp
+	6, // 3: inventory.v1.Reservation.expired_at:type_name -> google.protobuf.Timestamp
+	1, // 4: inventory.v1.GetStockResponse.stock_item:type_name -> inventory.v1.StockItem
+	4, // 5: inventory.v1.InventoryService.GetStock:input_type -> inventory.v1.GetStockRequest
+	5, // 6: inventory.v1.InventoryService.GetStock:output_type -> inventory.v1.GetStockResponse
+	6, // [6:7] is the sub-list for method output_type
+	5, // [5:6] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_inventory_v1_inventory_proto_init() }
@@ -347,9 +448,9 @@ func file_inventory_v1_inventory_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_inventory_v1_inventory_proto_rawDesc), len(file_inventory_v1_inventory_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_inventory_v1_inventory_proto_goTypes,
 		DependencyIndexes: file_inventory_v1_inventory_proto_depIdxs,

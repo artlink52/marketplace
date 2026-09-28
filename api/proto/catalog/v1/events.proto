@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package catalog.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/catalog/v1;catalogv1";
+
+import "catalog/v1/catalog.proto";
+import "common/v1/common.proto";
+
+message ProductChanged {
+  string product_id = 1;
+  string seller_id = 2;
+  string title = 3;
+  string description = 4;
+  string category_id = 5;
+  common.v1.Money price = 6;
+  ProductStatus status = 7;
+}
+
+message ProductArchived {
+  string product_id = 1;
+}

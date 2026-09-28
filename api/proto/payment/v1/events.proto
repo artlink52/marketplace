@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/payment/v1;paymentv1";
+
+import "payment/v1/payment.proto";
+
+message PaymentSucceeded {
+  string order_id = 1;
+  string payment_id = 2;
+}
+
+message PaymentFailed {
+  string order_id = 1;
+  string payment_id = 2;
+  PaymentFailureReason reason = 3;
+}

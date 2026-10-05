@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/common/v1;commonv1";
+
+import "google/protobuf/timestamp.proto";
+
+message Money {
+  int64 amount = 1;
+  string currency = 2;
+}
+
+message EventEnvelope {
+  string event_id = 1;                        // uuid самого события
+  string event_type = 2;                      // "order.created", "stock.reserved"
+  string aggregate_id = 3;                     // order_id / payment_id / product_id
+  string trace_id = 4;                         // сквозная трассировка по саге
+  google.protobuf.Timestamp occurred_at = 5;
+  int32 schema_version = 6;                    // версия payload-схемы для этого event_type
+  bytes payload = 7;                           // marshaled сервис-специфичное сообщение
+}
+
+message PageRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message PageResponse {
+  string next_page_token = 1;
+  int32 total = 2;
+}
+
+message Address {
+  string country = 1;
+  string city = 2;
+  string street = 3;
+  string postal_code = 4;
+}

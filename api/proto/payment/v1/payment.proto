@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/payment/v1;paymentv1";
+
+import "common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+enum PaymentFailureReason {
+  PAYMENT_FAILURE_REASON_UNSPECIFIED = 0;
+  PAYMENT_FAILURE_REASON_DECLINED = 1;
+  PAYMENT_FAILURE_REASON_INSUFFICIENT_FUNDS = 2;
+  PAYMENT_FAILURE_REASON_PROVIDER_ERROR = 3;
+  PAYMENT_FAILURE_REASON_TIMEOUT = 4;
+}
+
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_STATUS_PENDING = 1;
+  PAYMENT_STATUS_SUCCEEDED = 2;
+  PAYMENT_STATUS_FAILED = 3;
+}
+
+enum Provider {
+  PROVIDER_UNSPECIFIED = 0;
+  PROVIDER_STRIPE = 1;
+  PROVIDER_YOOKASSA = 2;
+}
+
+message Payment {
+  string id = 1;
+  string order_id = 2;
+  PaymentStatus status = 3;
+  common.v1.Money amount = 4;
+  Provider provider = 5;
+  string provider_payment_id = 6; // id платежа на стороне провайдера, нужен для reconciliation-воркера
+  PaymentFailureReason failure_reason = 7;
+  string provider_message = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message GetPaymentRequest {
+  string order_id = 1;
+}
+
+message GetPaymentResponse {
+  Payment payment = 1;
+}
+
+service PaymentService {
+  rpc GetPayment (GetPaymentRequest) returns (GetPaymentResponse);
+}

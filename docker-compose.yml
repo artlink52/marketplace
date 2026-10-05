@@ -1,0 +1,37 @@
+services:
+  user-db:
+    image: postgres:16-alpine
+    container_name: marketplace-user.go-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
+    ports:
+      - "${USER_DB_PORT}:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB_USER} -d ${USER_DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  user-service:
+    build:
+      context: marketplace
+      dockerfile: internal/cmd/user/Dockerfile
+    container_name: marketplace-user.go-service
+    restart: unless-stopped
+    depends_on:
+      user-db:
+        condition: service_healthy
+    environment:
+      USER_DATABASE_DSN: postgres://${USER_DB_USER}:${USER_DB_PASSWORD}@user.go-db:5432/${USER_DB_NAME}?sslmode=disable
+      USER_GRPC_PORT: ${USER_GRPC_PORT}
+      USER_GRPC_TIMEOUT: ${USER_GRPC_TIMEOUT}
+    ports:
+      - "${USER_GRPC_PORT}:${USER_GRPC_PORT}"
+
+volumes:
+  user_db_data:

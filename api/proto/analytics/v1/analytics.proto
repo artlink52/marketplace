@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package analytics.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/analytics/v1;analyticsv1";
+
+import "common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message OrdersSummary {
+  int64 total_orders = 1;
+  int64 cancelled_orders = 2;
+  common.v1.Money total_revenue = 3;
+  common.v1.Money avg_order_value = 4;
+}
+
+message GetOrdersSummaryRequest {
+  google.protobuf.Timestamp date_from = 1;
+  google.protobuf.Timestamp date_to = 2;
+}
+
+message GetOrdersSummaryResponse {
+  OrdersSummary summary = 1;
+}
+
+message ProductStat {
+  string product_id = 1;
+  int64 units_sold = 2;
+  common.v1.Money revenue = 3;
+}
+
+message GetTopProductsRequest {
+  google.protobuf.Timestamp date_from = 1;
+  google.protobuf.Timestamp date_to = 2;
+  int32 limit = 3;
+}
+
+message GetTopProductsResponse {
+  repeated ProductStat items = 1;
+}
+
+service AnalyticsService {
+  rpc GetOrdersSummary (GetOrdersSummaryRequest) returns (GetOrdersSummaryResponse);
+  rpc GetTopProducts (GetTopProductsRequest) returns (GetTopProductsResponse);
+}

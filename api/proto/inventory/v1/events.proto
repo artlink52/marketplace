@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package inventory.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/inventory/v1;inventoryv1";
+
+import "inventory/v1/inventory.proto";
+
+message StockReserved {
+  string order_id = 1;
+  repeated ReservationItem items = 2;
+}
+
+message StockReservationFailed {
+  string order_id = 1;
+  string reason = 2;
+}
+
+message StockCommitFailed {
+  string order_id = 1;
+}

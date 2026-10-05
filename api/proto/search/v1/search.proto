@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package search.v1;
+
+option go_package = "github.com/artlink52/marketplace/gen/go/search/v1;searchv1";
+
+import "common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message ProductDocument {
+  string product_id = 1;
+  string title = 2;
+  string description = 3;
+  string category_id = 4;
+  common.v1.Money price = 5;
+  string seller_id = 6;
+  google.protobuf.Timestamp indexed_at = 7;
+}
+
+message SearchProductsRequest {
+  string query = 1;
+  string category_id = 2;
+  common.v1.Money price_min = 3;
+  common.v1.Money price_max = 4;
+  common.v1.PageRequest page = 5;
+}
+
+message SearchProductsResponse {
+  repeated ProductDocument items = 1;
+  common.v1.PageResponse page = 2;
+}
+
+service SearchService {
+  rpc SearchProducts (SearchProductsRequest) returns (SearchProductsResponse);
+}

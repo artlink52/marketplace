@@ -20,15 +20,13 @@ type Client interface {
 
 type Handler struct {
 	client    Client
-	log       render.Logger
 	jwtSecret string
 	jwtTTL    time.Duration
 }
 
-func New(client Client, log render.Logger, jwtSecret string, jwtTTL time.Duration) *Handler {
+func New(client Client, jwtSecret string, jwtTTL time.Duration) *Handler {
 	return &Handler{
 		client:    client,
-		log:       log,
 		jwtSecret: jwtSecret,
 		jwtTTL:    jwtTTL,
 	}
@@ -39,7 +37,8 @@ type registerResponse struct {
 }
 
 type loginResponse struct {
-	Token string `json:"token"`
+	UserID string `json:"user_id"`
+	Token  string `json:"token"`
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
@@ -75,13 +74,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := lib.NewToken(userID, string(role), h.jwtSecret, h.jwtTTL)
+	token, err := lib.NewToken(lib.Claims{UserID: userID, Role: string(role)}, h.jwtSecret, h.jwtTTL)
 	if err != nil {
 		res.Error(http.StatusInternalServerError, "failed to generate token")
 		return
 	}
 
-	res.JSON(http.StatusOK, loginResponse{Token: token})
+	res.JSON(http.StatusOK, loginResponse{UserID: userID, Token: token})
 }
 
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {

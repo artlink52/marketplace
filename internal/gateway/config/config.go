@@ -8,24 +8,12 @@ import (
 )
 
 type Config struct {
-	HTTP    HTTPConfig
-	Infra   InfraConfig
-	Clients ClientsConfig
-}
-
-type HTTPConfig struct {
-	HTTPPort    string        `envconfig:"HTTP_PORT" default:"8080"`
-	HTTPTimeout time.Duration `envconfig:"HTTP_TIMEOUT" default:"5s"`
-}
-
-type InfraConfig struct {
-	JWTSecret string        `envconfig:"JWT_SECRET" required:"true"`
-	JWTTTL    time.Duration `envconfig:"JWT_TTL" default:"24h"`
-}
-
-type ClientsConfig struct {
+	HTTPPort           string        `envconfig:"HTTP_PORT" default:"8080"`
+	HTTPTimeout        time.Duration `envconfig:"HTTP_TIMEOUT" default:"5s"`
+	JWTSecret          string        `envconfig:"JWT_SECRET" required:"true"`
+	JWTTTL             time.Duration `envconfig:"JWT_TTL" default:"24h"`
 	UserServiceAddr    string        `envconfig:"USER_SERVICE_ADDR" required:"true"`
-	UserServiceTimeout time.Duration `envconfig:"USER_SERVICE_TIMEOUT" default:"10s"`
+	UserServiceTimeout time.Duration `envconfig:"USER_SERVICE_TIMEOUT" default:"5s"`
 }
 
 func New() (Config, error) {
@@ -41,6 +29,5 @@ func MustLoad() Config {
 	if err != nil {
 		panic(err)
 	}
-
 	return cfg
 }

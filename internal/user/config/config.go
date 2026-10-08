@@ -8,13 +8,9 @@ import (
 )
 
 type Config struct {
-	DatabaseDSN string `envconfig:"DATABASE_DSN" required:"true"`
-	GRPC        GRPCConfig
-}
-
-type GRPCConfig struct {
-	Port    string        `envconfig:"PORT" required:"true"`
-	Timeout time.Duration `envconfig:"TIMEOUT" default:"10s"`
+	DatabaseDSN string        `envconfig:"DATABASE_DSN" required:"true"`
+	Port        string        `envconfig:"PORT" required:"true"`
+	Timeout     time.Duration `envconfig:"TIMEOUT" default:"10s"`
 }
 
 func New() (Config, error) {

@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out/user.go-service ./internal/cmd/user
+RUN CGO_ENABLED=0 GOOS=linux go build -o /out/user-service ./internal/cmd/user
 
 FROM alpine:3.20
 COPY --from=builder /out/user-service /user-service

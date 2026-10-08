@@ -1,7 +1,7 @@
 services:
   user-db:
     image: postgres:16-alpine
-    container_name: marketplace-user.go-db
+    container_name: marketplace-user-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${USER_DB_USER}
@@ -19,19 +19,32 @@ services:
 
   user-service:
     build:
-      context: marketplace
+      context: .
       dockerfile: internal/cmd/user/Dockerfile
-    container_name: marketplace-user.go-service
+    container_name: marketplace-user-service
     restart: unless-stopped
     depends_on:
       user-db:
         condition: service_healthy
+    env_file: .env
     environment:
-      USER_DATABASE_DSN: postgres://${USER_DB_USER}:${USER_DB_PASSWORD}@user.go-db:5432/${USER_DB_NAME}?sslmode=disable
-      USER_GRPC_PORT: ${USER_GRPC_PORT}
-      USER_GRPC_TIMEOUT: ${USER_GRPC_TIMEOUT}
+      USER_DATABASE_DSN: postgres://${USER_DB_USER}:${USER_DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?sslmode=disable
     ports:
-      - "${USER_GRPC_PORT}:${USER_GRPC_PORT}"
+      - "${USER_PORT}:${USER_PORT}"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: internal/cmd/gateway/Dockerfile
+    container_name: marketplace-gateway
+    restart: unless-stopped
+    depends_on:
+      - user-service
+    env_file: .env
+    environment:
+      GATEWAY_USER_SERVICE_ADDR: user-service:${USER_PORT}
+    ports:
+      - "${GATEWAY_HTTP_PORT}:${GATEWAY_HTTP_PORT}"
 
 volumes:
   user_db_data:

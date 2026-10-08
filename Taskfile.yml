@@ -42,14 +42,14 @@ tasks:
   migrate-user-up:
     desc: Накатывает все миграции user.go-сервиса
     cmds:
-      - goose -dir internal/user.go/migrations postgres "{{.USER_DB_DSN}}" up
+      - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" up
 
   migrate-user-down:
     desc: Откатывает последнюю миграцию user.go-сервиса
     cmds:
-      - goose -dir internal/user.go/migrations postgres "{{.USER_DB_DSN}}" down
+      - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" down
 
   migrate-user-status:
     desc: Показывает статус миграций user.go-сервиса
     cmds:
-      - goose -dir internal/user.go/migrations postgres "{{.USER_DB_DSN}}" status
+      - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" status

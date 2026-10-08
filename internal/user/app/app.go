@@ -27,7 +27,7 @@ func New(cfg config.Config) (*App, error) {
 
 	repo := repository.New(dbuser.New(pool))
 	userService := service.New(repo)
-	grpcApp := grpcapp.New(userService, cfg.GRPC.Port, cfg.GRPC.Timeout)
+	grpcApp := grpcapp.New(userService, cfg.Port, cfg.Timeout)
 
 	return &App{
 		GRPCServer: grpcApp,

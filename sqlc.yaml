@@ -1,13 +1,31 @@
 version: "2"
 
-sql:
+user_sql:
   - engine: "postgresql"
-    queries: "internal/user.go/repository/queries"
-    schema: "internal/user.go/migrations"
+    queries: "internal/user/repository/queries"
+    schema: "internal/user/migrations"
     gen:
       go:
         package: "dbuser"
-        out: "internal/user.go/repository/sqlc"
+        out: "internal/user/repository/sqlc"
+        sql_package: "pgx/v5"
+        emit_pointers_for_null_types: true
+        overrides:
+          - db_type: "uuid"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+
+order_sql:
+  - engine: "postgresql"
+    queries: "internal/order/repository/queries"
+    schema: "internal/order/migrations"
+    gen:
+      go:
+        package: "dborder"
+        out: "internal/order/repository/sqlc"
         sql_package: "pgx/v5"
         emit_pointers_for_null_types: true
         overrides:

@@ -4,6 +4,7 @@ dotenv: ['.env']
 
 vars:
   USER_DB_DSN: postgres://{{.USER_DB_USER}}:{{.USER_DB_PASSWORD}}@localhost:{{.USER_DB_PORT}}/{{.USER_DB_NAME}}?sslmode=disable
+  ORDER_DB_DSN: postgres://{{.ORDER_DB_USER}}:{{.ORDER_DB_PASSWORD}}@localhost:{{.ORDER_DB_PORT}}/{{.ORDER_DB_NAME}}?sslmode=disable
 
 tasks:
   gen-proto:
@@ -16,7 +17,13 @@ tasks:
   gen-user:
     desc: Генерирует Go-код из query (через sqlc)
     cmds:
-      - rm -rf internal/user.go/repository/sqlc
+      - rm -rf internal/user/repository/sqlc
+      - sqlc generate
+
+  gen-order:
+    desc: Генерирует Go-код из query (через sqlc)
+    cmds:
+      - rm -rf internal/order/repository/sqlc
       - sqlc generate
 
   docker-up:
@@ -40,7 +47,7 @@ tasks:
       - docker compose logs -f
 
   migrate-user-up:
-    desc: Накатывает все миграции user.go-сервиса
+    desc: Накатывает все миграции user-сервиса
     cmds:
       - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" up
 
@@ -53,3 +60,10 @@ tasks:
     desc: Показывает статус миграций user.go-сервиса
     cmds:
       - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" status
+
+  #order-----
+
+  migrate-order-up:
+    desc: Накатывает все миграции user-сервиса
+    cmds:
+      - goose -dir internal/order/migrations postgres "{{.ORDER_DB_DSN}}" up

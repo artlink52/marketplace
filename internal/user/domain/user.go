@@ -24,11 +24,11 @@ const (
 )
 
 var (
-	ErrUserNotFound       = errors.New("user.go not found")
+	ErrUserNotFound       = errors.New("user not found")
 	ErrEmailAlreadyExists = errors.New("email already exists")
 	ErrRoleNotAllowed     = errors.New("role not allowed for self-registration")
 	ErrInvalidCredentials = errors.New("invalid email or password")
-	ErrUserBlocked        = errors.New("user.go is blocked")
+	ErrUserBlocked        = errors.New("user is blocked")
 )
 
 type NewUser struct {

@@ -50,7 +50,7 @@ func (s *UserServer) Register(ctx context.Context, req *userv1.RegisterRequest) 
 		case errors.Is(err, domain.ErrRoleNotAllowed):
 			return nil, status.Error(codes.InvalidArgument, "role not allowed for self-registration")
 		default:
-			return nil, status.Error(codes.Internal, "failed to register user.go")
+			return nil, status.Error(codes.Internal, "failed to register user")
 		}
 	}
 
@@ -92,7 +92,7 @@ func (s *UserServer) GetUser(ctx context.Context, req *userv1.GetUserRequest) (*
 	user, err := s.userService.GetUser(ctx, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
-			return nil, status.Error(codes.NotFound, "user.go not found")
+			return nil, status.Error(codes.NotFound, "user not found")
 		}
 		return nil, status.Error(codes.Internal, "failed to get user.go")
 	}

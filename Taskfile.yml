@@ -5,6 +5,7 @@ dotenv: ['.env']
 vars:
   USER_DB_DSN: postgres://{{.USER_DB_USER}}:{{.USER_DB_PASSWORD}}@localhost:{{.USER_DB_PORT}}/{{.USER_DB_NAME}}?sslmode=disable
   ORDER_DB_DSN: postgres://{{.ORDER_DB_USER}}:{{.ORDER_DB_PASSWORD}}@localhost:{{.ORDER_DB_PORT}}/{{.ORDER_DB_NAME}}?sslmode=disable
+  CATALOG_DB_DSN: postgres://{{.CATALOG_DB_USER}}:{{.CATALOG_DB_PASSWORD}}@localhost:{{.CATALOG_DB_PORT}}/{{.CATALOG_DB_NAME}}?sslmode=disable
 
 tasks:
   gen-proto:
@@ -24,6 +25,12 @@ tasks:
     desc: Генерирует Go-код из query (через sqlc)
     cmds:
       - rm -rf internal/order/repository/sqlc
+      - sqlc generate
+
+  gen-catalog:
+    desc: Генерирует Go-код из query (через sqlc)
+    cmds:
+      - rm -rf internal/catalog/repository/sqlc
       - sqlc generate
 
   docker-up:
@@ -46,24 +53,36 @@ tasks:
     cmds:
       - docker compose logs -f
 
+  # USER --------------------
   migrate-user-up:
     desc: Накатывает все миграции user-сервиса
     cmds:
       - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" up
 
   migrate-user-down:
-    desc: Откатывает последнюю миграцию user.go-сервиса
+    desc: Откатывает последнюю миграцию user-сервиса
     cmds:
       - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" down
 
   migrate-user-status:
-    desc: Показывает статус миграций user.go-сервиса
+    desc: Показывает статус миграций user-сервиса
     cmds:
       - goose -dir internal/user/migrations postgres "{{.USER_DB_DSN}}" status
 
   #order-----
 
   migrate-order-up:
-    desc: Накатывает все миграции user-сервиса
+    desc: Накатывает все миграции order-сервиса
     cmds:
       - goose -dir internal/order/migrations postgres "{{.ORDER_DB_DSN}}" up
+
+  #CATALOG ------------------------
+  migrate-catalog-up:
+    desc: Накатывает все миграции order-сервиса
+    cmds:
+      - goose -dir internal/catalog/migrations postgres "{{.CATALOG_DB_DSN}}" up
+
+  migrate-catalog-down:
+    desc: Откатывает последнюю миграцию catalog-сервиса
+    cmds:
+      - goose -dir internal/catalog/migrations postgres "{{.CATALOG_DB_DSN}}" down

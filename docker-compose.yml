@@ -17,6 +17,42 @@ services:
       timeout: 3s
       retries: 5
 
+  catalog_db:
+    image: postgres:16-alpine
+    container_name: marketplace-catalog-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${CATALOG_DB_USER}
+      POSTGRES_PASSWORD: ${CATALOG_DB_PASSWORD}
+      POSTGRES_DB: ${CATALOG_DB_NAME}
+    ports:
+      - "${CATALOG_DB_PORT}:5432"
+    volumes:
+      - catalog_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${CATALOG_DB_USER} -d ${CATALOG_DB_NAME}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  order-db:
+    image: postgres:16-alpine
+    container_name: marketplace-order-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${ORDER_DB_USER}
+      POSTGRES_PASSWORD: ${ORDER_DB_PASSWORD}
+      POSTGRES_DB: ${ORDER_DB_NAME}
+    ports:
+      - "${ORDER_DB_PORT}:5432"
+    volumes:
+      - order_db_data:/var/lib/postgres/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ORDER_DB_USER} -d ${ORDER_DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   user-service:
     build:
       context: .
@@ -31,6 +67,21 @@ services:
       USER_DATABASE_DSN: postgres://${USER_DB_USER}:${USER_DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?sslmode=disable
     ports:
       - "${USER_PORT}:${USER_PORT}"
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: internal/cmd/catalog/Dockerfile
+    container_name: marketplace-catalog-service
+    restart: unless-stopped
+    depends_on:
+      catalog_db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      CATALOG_DATABASE_DSN: postgres://${CATALOG_DB_USER}:${CATALOG_DB_PASSWORD}@catalog-db:5432/${CATALOG_DB_NAME}?sslmode=disable
+    ports:
+      - "${CATALOG_PORT}:${CATALOG_PORT}"
 
   gateway:
     build:
@@ -48,3 +99,5 @@ services:
 
 volumes:
   user_db_data:
+  order_db_data:
+  catalog_db_data:

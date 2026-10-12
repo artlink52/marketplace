@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -18,11 +19,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go application.GRPCServer.MustRun()
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- application.GRPCServer.Run()
+	}()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
-	<-stop
+	select {
+	case err := <-errCh:
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	case <-stop:
+	}
 	application.Stop()
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 func main() {
 	cfg := config.MustLoad()
+	ctx := context.Background()
 
 	application, err := app.New(cfg)
 	if err != nil {
@@ -34,7 +36,7 @@ func main() {
 	case <-stop:
 	}
 
-	if err := application.Stop(); err != nil {
+	if err := application.Stop(ctx); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -6,7 +6,7 @@ CREATE TABLE orders (
     id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id          UUID        NOT NULL,
     status           order_status NOT NULL DEFAULT 'pending',
-    total_amount     BIGINT      NOT NULL DEFAULT 0,
+    total_amount     BIGINT      NOT NULL,
     currency         TEXT        NOT NULL DEFAULT 'RUB',
     cancel_reason    cancel_reason,
     idempotency_key  UUID        NOT NULL UNIQUE,

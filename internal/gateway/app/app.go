@@ -60,8 +60,8 @@ func (a *App) Run() error {
 	return nil
 }
 
-func (a *App) Stop() error {
-	ctx, cancel := context.WithTimeout(context.Background(), a.httpTimeout)
+func (a *App) Stop(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, a.httpTimeout)
 	defer cancel()
 
 	if err := a.server.Shutdown(ctx); err != nil {

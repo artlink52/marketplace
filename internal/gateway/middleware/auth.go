@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/artlink52/marketplace/internal/gateway/lib"
@@ -38,6 +39,25 @@ func Auth(secret string) func(http.Handler) http.Handler {
 
 			ctx := context.WithValue(r.Context(), claimsKey, claims)
 			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func RequireRole(roles ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			claims, ok := ClaimsFromContext(r.Context())
+			if !ok {
+				render.New(w).Error(http.StatusUnauthorized, "unauthorized")
+				return
+			}
+
+			if !slices.Contains(roles, claims.Role) {
+				render.New(w).Error(http.StatusForbidden, "forbidden")
+				return
+			}
+
+			next.ServeHTTP(w, r)
 		})
 	}
 }

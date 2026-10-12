@@ -18,7 +18,17 @@ message Category {
   string id = 1;
   string name = 2;
   string slug = 3;
-  string parent_id = 4; // что это значит?
+  repeated Category subcategories = 4;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string slug = 2;
+  optional string parent_id = 3;
+}
+
+message CreateCategoryResponse {
+  Category category = 1;
 }
 
 message Product {
@@ -83,10 +93,27 @@ message ListProductsResponse {
   common.v1.PageResponse page = 2;
 }
 
+message BatchGetProductsRequest {
+  repeated string product_ids = 1;
+}
+
+message BatchGetProductsResponse {
+  repeated Product products = 1;
+}
+
+message ListCategoriesRequest {}
+
+message ListCategoriesResponse {
+  repeated Category categories = 1;
+}
+
 service CatalogService {
   rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse);
   rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse);
   rpc ArchiveProduct (ArchiveProductRequest) returns (ArchiveProductResponse);
   rpc GetProduct (GetProductRequest) returns (GetProductResponse);
   rpc ListProducts (ListProductsRequest) returns (ListProductsResponse);
+  rpc BatchGetProducts (BatchGetProductsRequest) returns (BatchGetProductsResponse);
+  rpc ListCategories (ListCategoriesRequest) returns (ListCategoriesResponse);
+  rpc CreateCategory (CreateCategoryRequest) returns (CreateCategoryResponse);
 }

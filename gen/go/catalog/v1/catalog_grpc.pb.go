@@ -19,11 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CatalogService_CreateProduct_FullMethodName  = "/catalog.v1.CatalogService/CreateProduct"
-	CatalogService_UpdateProduct_FullMethodName  = "/catalog.v1.CatalogService/UpdateProduct"
-	CatalogService_ArchiveProduct_FullMethodName = "/catalog.v1.CatalogService/ArchiveProduct"
-	CatalogService_GetProduct_FullMethodName     = "/catalog.v1.CatalogService/GetProduct"
-	CatalogService_ListProducts_FullMethodName   = "/catalog.v1.CatalogService/ListProducts"
+	CatalogService_CreateProduct_FullMethodName    = "/catalog.v1.CatalogService/CreateProduct"
+	CatalogService_UpdateProduct_FullMethodName    = "/catalog.v1.CatalogService/UpdateProduct"
+	CatalogService_ArchiveProduct_FullMethodName   = "/catalog.v1.CatalogService/ArchiveProduct"
+	CatalogService_GetProduct_FullMethodName       = "/catalog.v1.CatalogService/GetProduct"
+	CatalogService_ListProducts_FullMethodName     = "/catalog.v1.CatalogService/ListProducts"
+	CatalogService_BatchGetProducts_FullMethodName = "/catalog.v1.CatalogService/BatchGetProducts"
+	CatalogService_ListCategories_FullMethodName   = "/catalog.v1.CatalogService/ListCategories"
+	CatalogService_CreateCategory_FullMethodName   = "/catalog.v1.CatalogService/CreateCategory"
 )
 
 // CatalogServiceClient is the client API for CatalogService service.
@@ -35,6 +38,9 @@ type CatalogServiceClient interface {
 	ArchiveProduct(ctx context.Context, in *ArchiveProductRequest, opts ...grpc.CallOption) (*ArchiveProductResponse, error)
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 	ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (*ListProductsResponse, error)
+	BatchGetProducts(ctx context.Context, in *BatchGetProductsRequest, opts ...grpc.CallOption) (*BatchGetProductsResponse, error)
+	ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error)
+	CreateCategory(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*CreateCategoryResponse, error)
 }
 
 type catalogServiceClient struct {
@@ -95,6 +101,36 @@ func (c *catalogServiceClient) ListProducts(ctx context.Context, in *ListProduct
 	return out, nil
 }
 
+func (c *catalogServiceClient) BatchGetProducts(ctx context.Context, in *BatchGetProductsRequest, opts ...grpc.CallOption) (*BatchGetProductsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BatchGetProductsResponse)
+	err := c.cc.Invoke(ctx, CatalogService_BatchGetProducts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *catalogServiceClient) ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListCategoriesResponse)
+	err := c.cc.Invoke(ctx, CatalogService_ListCategories_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *catalogServiceClient) CreateCategory(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*CreateCategoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCategoryResponse)
+	err := c.cc.Invoke(ctx, CatalogService_CreateCategory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogServiceServer is the server API for CatalogService service.
 // All implementations must embed UnimplementedCatalogServiceServer
 // for forward compatibility.
@@ -104,6 +140,9 @@ type CatalogServiceServer interface {
 	ArchiveProduct(context.Context, *ArchiveProductRequest) (*ArchiveProductResponse, error)
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error)
+	BatchGetProducts(context.Context, *BatchGetProductsRequest) (*BatchGetProductsResponse, error)
+	ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error)
+	CreateCategory(context.Context, *CreateCategoryRequest) (*CreateCategoryResponse, error)
 	mustEmbedUnimplementedCatalogServiceServer()
 }
 
@@ -128,6 +167,15 @@ func (UnimplementedCatalogServiceServer) GetProduct(context.Context, *GetProduct
 }
 func (UnimplementedCatalogServiceServer) ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListProducts not implemented")
+}
+func (UnimplementedCatalogServiceServer) BatchGetProducts(context.Context, *BatchGetProductsRequest) (*BatchGetProductsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BatchGetProducts not implemented")
+}
+func (UnimplementedCatalogServiceServer) ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListCategories not implemented")
+}
+func (UnimplementedCatalogServiceServer) CreateCategory(context.Context, *CreateCategoryRequest) (*CreateCategoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateCategory not implemented")
 }
 func (UnimplementedCatalogServiceServer) mustEmbedUnimplementedCatalogServiceServer() {}
 func (UnimplementedCatalogServiceServer) testEmbeddedByValue()                        {}
@@ -240,6 +288,60 @@ func _CatalogService_ListProducts_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogService_BatchGetProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchGetProductsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).BatchGetProducts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_BatchGetProducts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).BatchGetProducts(ctx, req.(*BatchGetProductsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CatalogService_ListCategories_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCategoriesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).ListCategories(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_ListCategories_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).ListCategories(ctx, req.(*ListCategoriesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CatalogService_CreateCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).CreateCategory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_CreateCategory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).CreateCategory(ctx, req.(*CreateCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CatalogService_ServiceDesc is the grpc.ServiceDesc for CatalogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +368,18 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListProducts",
 			Handler:    _CatalogService_ListProducts_Handler,
+		},
+		{
+			MethodName: "BatchGetProducts",
+			Handler:    _CatalogService_BatchGetProducts_Handler,
+		},
+		{
+			MethodName: "ListCategories",
+			Handler:    _CatalogService_ListCategories_Handler,
+		},
+		{
+			MethodName: "CreateCategory",
+			Handler:    _CatalogService_CreateCategory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

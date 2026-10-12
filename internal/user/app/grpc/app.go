@@ -41,7 +41,7 @@ func timeoutInterceptor(timeout time.Duration) grpc.UnaryServerInterceptor {
 }
 
 func (a *App) Run() error {
-	const op = "grpcapp.Run"
+	const op = "usergrpc.Run"
 
 	lis, err := net.Listen("tcp", ":"+a.port)
 	if err != nil {
@@ -49,12 +49,6 @@ func (a *App) Run() error {
 	}
 
 	return a.gRPCServer.Serve(lis)
-}
-
-func (a *App) MustRun() {
-	if err := a.Run(); err != nil {
-		panic(err)
-	}
 }
 
 func (a *App) Stop() {

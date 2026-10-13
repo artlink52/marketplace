@@ -65,9 +65,14 @@ func (s *CatalogServer) CreateCategory(
 }
 
 func toProtoCategory(c domain.Category) *catalogv1.Category {
-	return &catalogv1.Category{
+	cat := &catalogv1.Category{
 		Id:   c.ID.String(),
 		Name: c.Name,
 		Slug: c.Slug,
 	}
+	if c.ParentID != nil {
+		s := c.ParentID.String()
+		cat.ParentId = &s
+	}
+	return cat
 }

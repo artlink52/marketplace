@@ -33,11 +33,11 @@ type Client struct {
 
 type User struct {
 	ID        uuid.UUID `json:"id"`
-	Email     string
-	Role      Role
-	Status    Status
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Email     string    `json:"email"`
+	Role      Role      `json:"role"`
+	Status    Status    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type RegisterInput struct {
@@ -54,7 +54,7 @@ type AuthenticateInput struct {
 func New(addr string) (*Client, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, fmt.Errorf("connect to user.go-service: %w", err)
+		return nil, fmt.Errorf("connect to user-service: %w", err)
 	}
 
 	return &Client{
@@ -65,7 +65,7 @@ func New(addr string) (*Client, error) {
 
 func (c *Client) Close() error {
 	if err := c.conn.Close(); err != nil {
-		return fmt.Errorf("close user.go-service: %w", err)
+		return fmt.Errorf("close user-service: %w", err)
 	}
 
 	return nil

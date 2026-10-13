@@ -11,7 +11,6 @@ var (
 	ErrParentNotFound        = errors.New("parent category not found")
 	ErrInvalidCategoryName   = errors.New("invalid category name")
 	ErrInvalidCategorySlug   = errors.New("invalid category slug")
-	ErrNoPrivacy             = errors.New("no privacy")
 )
 
 type Category struct {

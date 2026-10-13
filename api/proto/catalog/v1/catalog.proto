@@ -19,6 +19,7 @@ message Category {
   string name = 2;
   string slug = 3;
   repeated Category subcategories = 4;
+  optional string parent_id = 5;
 }
 
 message CreateCategoryRequest {

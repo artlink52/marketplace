@@ -28,7 +28,7 @@ var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
 	ErrRoleNotAllowed     = errors.New("role not allowed for self-registration")
 	ErrInvalidCredentials = errors.New("invalid email or password")
-	ErrUserBlocked        = errors.New("user is blocked")
+	ErrUserBlocked        = errors.New("userv is blocked")
 )
 
 type NewUser struct {

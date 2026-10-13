@@ -14,6 +14,9 @@ type Config struct {
 	JWTTTL             time.Duration `envconfig:"JWT_TTL" default:"24h"`
 	UserServiceAddr    string        `envconfig:"USER_SERVICE_ADDR" required:"true"`
 	UserServiceTimeout time.Duration `envconfig:"USER_SERVICE_TIMEOUT" default:"5s"`
+
+	CatalogServiceAddr    string `envconfig:"CATALOG_SERVICE_ADDR" required:"true"`
+	CatalogServiceTimeout string `envconfig:"CATALOG_SERVICE_TIMEOUT" default:"5s"`
 }
 
 func New() (Config, error) {

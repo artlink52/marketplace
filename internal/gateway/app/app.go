@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/artlink52/marketplace/internal/gateway/client/catalog"
 	userclient "github.com/artlink52/marketplace/internal/gateway/client/user"
 	"github.com/artlink52/marketplace/internal/gateway/config"
+	"github.com/artlink52/marketplace/internal/gateway/handler"
 	userhandler "github.com/artlink52/marketplace/internal/gateway/handler/user"
 	"github.com/artlink52/marketplace/internal/gateway/middleware"
 	"github.com/go-chi/chi/v5"
@@ -32,12 +34,17 @@ func New(cfg config.Config) (*App, error) {
 		cfg.JWTTTL,
 	)
 
+	catalogClient, err := catalog.New(cfg.CatalogServiceAddr)
+	if err != nil {
+		return nil, fmt.Errorf("create catalog client: %w", err)
+	}
+
 	auth := middleware.Auth(cfg.JWTSecret)
 
 	r := chi.NewRouter()
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
-	r.Mount("/", userhandler.NewRouter(userHandler, auth))
+	r.Mount("/", handler.NewRouter(userHandler, auth))
 
 	server := &http.Server{
 		Addr:         ":" + cfg.HTTPPort,

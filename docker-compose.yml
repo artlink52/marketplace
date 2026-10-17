@@ -1,4 +1,5 @@
 services:
+  # ---------- databases ----------
   user-db:
     image: postgres:16-alpine
     container_name: marketplace-user-db
@@ -17,7 +18,7 @@ services:
       timeout: 3s
       retries: 5
 
-  catalog_db:
+  catalog-db:
     image: postgres:16-alpine
     container_name: marketplace-catalog-db
     restart: unless-stopped
@@ -30,7 +31,7 @@ services:
     volumes:
       - catalog_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${CATALOG_DB_USER} -d ${CATALOG_DB_NAME}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${CATALOG_DB_USER} -d ${CATALOG_DB_NAME}"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -46,13 +47,14 @@ services:
     ports:
       - "${ORDER_DB_PORT}:5432"
     volumes:
-      - order_db_data:/var/lib/postgres/data
+      - order_db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${ORDER_DB_USER} -d ${ORDER_DB_NAME}"]
       interval: 5s
       timeout: 3s
       retries: 5
 
+  # ---------- services ----------
   user-service:
     build:
       context: .
@@ -62,9 +64,10 @@ services:
     depends_on:
       user-db:
         condition: service_healthy
-    env_file: .env
     environment:
       USER_DATABASE_DSN: postgres://${USER_DB_USER}:${USER_DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?sslmode=disable
+      USER_PORT: ${USER_PORT}
+      USER_TIMEOUT: ${USER_TIMEOUT:-10s}
     ports:
       - "${USER_PORT}:${USER_PORT}"
 
@@ -75,11 +78,12 @@ services:
     container_name: marketplace-catalog-service
     restart: unless-stopped
     depends_on:
-      catalog_db:
+      catalog-db:
         condition: service_healthy
-    env_file: .env
     environment:
       CATALOG_DATABASE_DSN: postgres://${CATALOG_DB_USER}:${CATALOG_DB_PASSWORD}@catalog-db:5432/${CATALOG_DB_NAME}?sslmode=disable
+      CATALOG_PORT: ${CATALOG_PORT}
+      CATALOG_TIMEOUT: ${CATALOG_TIMEOUT:-10s}
     ports:
       - "${CATALOG_PORT}:${CATALOG_PORT}"
 
@@ -91,13 +95,20 @@ services:
     restart: unless-stopped
     depends_on:
       - user-service
-    env_file: .env
+      - catalog-service
     environment:
+      GATEWAY_HTTP_PORT: ${GATEWAY_HTTP_PORT}
+      GATEWAY_HTTP_TIMEOUT: ${GATEWAY_HTTP_TIMEOUT:-5s}
+      GATEWAY_JWT_SECRET: ${GATEWAY_JWT_SECRET}
+      GATEWAY_JWT_TTL: ${GATEWAY_JWT_TTL:-24h}
       GATEWAY_USER_SERVICE_ADDR: user-service:${USER_PORT}
+      GATEWAY_USER_SERVICE_TIMEOUT: ${GATEWAY_USER_SERVICE_TIMEOUT:-3s}
+      GATEWAY_CATALOG_SERVICE_ADDR: catalog-service:${CATALOG_PORT}
+      GATEWAY_CATALOG_SERVICE_TIMEOUT: ${GATEWAY_CATALOG_SERVICE_TIMEOUT:-3s}
     ports:
       - "${GATEWAY_HTTP_PORT}:${GATEWAY_HTTP_PORT}"
 
 volumes:
   user_db_data:
-  order_db_data:
   catalog_db_data:
+  order_db_data:

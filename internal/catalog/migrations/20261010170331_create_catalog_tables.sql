@@ -12,7 +12,7 @@ CREATE TABLE product (
     id              UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
     seller_id       UUID           NOT NULL,
     title           TEXT           NOT NULL CHECK (length(title) BETWEEN 1 AND 255),
-    description     TEXT           NOT NULL DEFAULT '' CHECK (length(description) <= 5000),
+    description     TEXT           CHECK (length(description) <= 5000),
     category_id     UUID           NOT NULL REFERENCES category (id),
     price_amount    BIGINT         NOT NULL CHECK (price_amount >= 0),
     price_currency  CHAR(3)        NOT NULL DEFAULT 'RUB' CHECK (price_currency ~ '^[A-Z]{3}$'),

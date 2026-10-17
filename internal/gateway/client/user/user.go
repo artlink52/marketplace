@@ -51,8 +51,12 @@ type AuthenticateInput struct {
 	Password string `json:"password"`
 }
 
-func New(addr string) (*Client, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func New(addr string, timeout time.Duration) (*Client, error) {
+	conn, err := grpc.NewClient(
+		addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(timeoutInterceptor(timeout)),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("connect to user-service: %w", err)
 	}
@@ -142,5 +146,21 @@ func toGatewayRole(userRole userv1.UserRole) Role {
 		return RoleSeller
 	default:
 		return RoleCustomer
+	}
+}
+
+func timeoutInterceptor(timeout time.Duration) grpc.UnaryClientInterceptor {
+	return func(
+		ctx context.Context,
+		method string,
+		req any,
+		reply any,
+		cc *grpc.ClientConn,
+		invoker grpc.UnaryInvoker,
+		opts ...grpc.CallOption,
+	) error {
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }

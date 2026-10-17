@@ -1,7 +1,9 @@
 package catalog
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	catalogv1 "github.com/artlink52/marketplace/gen/go/catalog/v1"
 	"google.golang.org/grpc"
@@ -13,8 +15,12 @@ type Client struct {
 	conn    *grpc.ClientConn
 }
 
-func New(addr string) (*Client, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func New(addr string, timeout time.Duration) (*Client, error) {
+	conn, err := grpc.NewClient(
+		addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(timeoutInterceptor(timeout)),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("connect to catalog-service: %w", err)
 	}
@@ -30,4 +36,20 @@ func (c *Client) Close() error {
 		return fmt.Errorf("close catalog-service: %w", err)
 	}
 	return nil
+}
+
+func timeoutInterceptor(timeout time.Duration) grpc.UnaryClientInterceptor {
+	return func(
+		ctx context.Context,
+		method string,
+		req any,
+		reply any,
+		cc *grpc.ClientConn,
+		invoker grpc.UnaryInvoker,
+		opts ...grpc.CallOption,
+	) error {
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
 }

@@ -11,7 +11,7 @@ ORDER BY name;
 -- name: CreateProduct :one
 INSERT INTO product (seller_id, title, description, category_id, price_amount, price_currency)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING *;
+RETURNING id;
 
 -- name: GetProduct :one
 SELECT *

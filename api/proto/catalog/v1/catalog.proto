@@ -36,7 +36,7 @@ message Product {
   string id = 1;
   string seller_id = 2;
   string title = 3;
-  string description = 4;
+  optional string description = 4;
   string category_id = 5;
   common.v1.Money price = 6;
   ProductStatus status = 7;
@@ -72,7 +72,6 @@ message ArchiveProductRequest {
 }
 
 message ArchiveProductResponse{
-  Product product = 1;
 }
 
 message GetProductRequest {

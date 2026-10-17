@@ -76,7 +76,7 @@ type Product struct {
 	ID            uuid.UUID
 	SellerID      uuid.UUID
 	Title         string
-	Description   string
+	Description   *string
 	CategoryID    uuid.UUID
 	PriceAmount   int64
 	PriceCurrency string

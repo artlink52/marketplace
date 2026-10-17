@@ -7,6 +7,7 @@ import (
 
 	"github.com/artlink52/marketplace/internal/catalog/domain"
 	dbcatalog "github.com/artlink52/marketplace/internal/catalog/repository/sqlc"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -20,7 +21,6 @@ func New(q *dbcatalog.Queries) *CatalogRepository {
 
 func (r *CatalogRepository) CreateCategory(ctx context.Context, c domain.Category) (domain.Category, error) {
 	const op = "repository.CreateCategory"
-
 	row, err := r.q.CreateCategory(ctx, dbcatalog.CreateCategoryParams{
 		Name:     c.Name,
 		Slug:     c.Slug,
@@ -42,6 +42,46 @@ func (r *CatalogRepository) CreateCategory(ctx context.Context, c domain.Categor
 		Slug:     row.Slug,
 		ParentID: row.ParentID,
 	}, nil
+}
+
+func (r *CatalogRepository) ListCategories(ctx context.Context) ([]domain.Category, error) {
+	const op = "repository.ListCategories"
+	rows, err := r.q.ListCategories(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	var result []domain.Category
+	for _, row := range rows {
+		result = append(result, domain.Category{
+			ID:       row.ID,
+			Name:     row.Name,
+			Slug:     row.Slug,
+			ParentID: row.ParentID,
+		})
+	}
+	return result, nil
+}
+
+func (r *CatalogRepository) CreateProduct(ctx context.Context, p domain.Product) (uuid.UUID, error) {
+	id, err := r.q.CreateProduct(ctx, dbcatalog.CreateProductParams{
+		SellerID:      p.SellerID,
+		Title:         p.Title,
+		Description:   p.Description,
+		CategoryID:    p.CategoryID,
+		PriceAmount:   p.Price.Amount,
+		PriceCurrency: p.Price.Currency,
+	})
+	if err != nil {
+		switch {
+		case isUniqueViolation(err):
+			return uuid.Nil, domain.ErrProductAlreadyExists
+		case isForeignKeyViolation(err):
+			return uuid.Nil, domain.ErrCategoryNotFound
+		}
+	}
+
+	return id, nil
 }
 
 func isUniqueViolation(err error) bool {

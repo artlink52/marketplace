@@ -36,7 +36,7 @@ tasks:
   docker-up:
     desc: Поднимает локальные контейнеры (Postgres и т.д.) в фоне
     cmds:
-      - docker compose up -d
+      - docker compose up -d --build
 
   docker-down:
     desc: Останавливает и удаляет контейнеры (данные в volume сохраняются)

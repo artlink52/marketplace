@@ -38,3 +38,29 @@ func (c *Client) CreateCategory(ctx context.Context, input CreateCategoryInput) 
 		ParentID: resp.Category.ParentId,
 	}, nil
 }
+
+func (c *Client) ListCategories(ctx context.Context) ([]Category, error) {
+	resp, err := c.catalog.ListCategories(ctx, &catalogv1.ListCategoriesRequest{})
+	if err != nil {
+		return nil, fmt.Errorf("list categories: %w", err)
+	}
+
+	categories := make([]Category, 0, len(resp.GetCategories()))
+	for _, pc := range resp.GetCategories() {
+		categories = append(categories, fromProtoCategory(pc))
+	}
+	return categories, nil
+}
+
+func fromProtoCategory(c *catalogv1.Category) Category {
+	cat := Category{
+		ID:       c.GetId(),
+		Name:     c.GetName(),
+		Slug:     c.GetSlug(),
+		ParentID: c.ParentId,
+	}
+	for _, sub := range c.GetSubcategories() {
+		cat.Subcategories = append(cat.Subcategories, fromProtoCategory(sub))
+	}
+	return cat
+}

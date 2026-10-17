@@ -103,19 +103,19 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO product (seller_id, title, description, category_id, price_amount, price_currency)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, seller_id, title, description, category_id, price_amount, price_currency, status, created_at, updated_at
+RETURNING id
 `
 
 type CreateProductParams struct {
 	SellerID      uuid.UUID
 	Title         string
-	Description   string
+	Description   *string
 	CategoryID    uuid.UUID
 	PriceAmount   int64
 	PriceCurrency string
 }
 
-func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, createProduct,
 		arg.SellerID,
 		arg.Title,
@@ -124,20 +124,9 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.PriceAmount,
 		arg.PriceCurrency,
 	)
-	var i Product
-	err := row.Scan(
-		&i.ID,
-		&i.SellerID,
-		&i.Title,
-		&i.Description,
-		&i.CategoryID,
-		&i.PriceAmount,
-		&i.PriceCurrency,
-		&i.Status,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const fetchUnpublishedEvents = `-- name: FetchUnpublishedEvents :many

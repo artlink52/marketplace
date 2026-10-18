@@ -367,7 +367,7 @@ type CreateProductRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SellerId      string                 `protobuf:"bytes,1,opt,name=seller_id,json=sellerId,proto3" json:"seller_id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	CategoryId    string                 `protobuf:"bytes,4,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
 	Price         *v1.Money              `protobuf:"bytes,5,opt,name=price,proto3" json:"price,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -419,8 +419,8 @@ func (x *CreateProductRequest) GetTitle() string {
 }
 
 func (x *CreateProductRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
+	if x != nil && x.Description != nil {
+		return *x.Description
 	}
 	return ""
 }
@@ -1078,14 +1078,15 @@ const file_catalog_v1_catalog_proto_rawDesc = "" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\x0e\n" +
-	"\f_description\"\xb4\x01\n" +
+	"\f_description\"\xc9\x01\n" +
 	"\x14CreateProductRequest\x12\x1b\n" +
 	"\tseller_id\x18\x01 \x01(\tR\bsellerId\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1f\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12%\n" +
+	"\vdescription\x18\x03 \x01(\tH\x00R\vdescription\x88\x01\x01\x12\x1f\n" +
 	"\vcategory_id\x18\x04 \x01(\tR\n" +
 	"categoryId\x12&\n" +
-	"\x05price\x18\x05 \x01(\v2\x10.common.v1.MoneyR\x05price\"6\n" +
+	"\x05price\x18\x05 \x01(\v2\x10.common.v1.MoneyR\x05priceB\x0e\n" +
+	"\f_description\"6\n" +
 	"\x15CreateProductResponse\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\tR\tproductId\"\xc8\x01\n" +
@@ -1229,6 +1230,7 @@ func file_catalog_v1_catalog_proto_init() {
 	file_catalog_v1_catalog_proto_msgTypes[0].OneofWrappers = []any{}
 	file_catalog_v1_catalog_proto_msgTypes[1].OneofWrappers = []any{}
 	file_catalog_v1_catalog_proto_msgTypes[3].OneofWrappers = []any{}
+	file_catalog_v1_catalog_proto_msgTypes[4].OneofWrappers = []any{}
 	file_catalog_v1_catalog_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

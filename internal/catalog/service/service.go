@@ -17,6 +17,8 @@ const (
 
 	maxProductTitleLen       = 255
 	maxProductDescriptionLen = 5000
+
+	maxBatchSize = 100
 )
 
 var slugRe = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
@@ -25,7 +27,11 @@ type CatalogRepository interface {
 	CreateCategory(ctx context.Context, c domain.Category) (domain.Category, error)
 	ListCategories(ctx context.Context) ([]domain.Category, error)
 	CreateProduct(ctx context.Context, p domain.Product) (uuid.UUID, error)
+	GetProduct(ctx context.Context, id uuid.UUID) (domain.Product, error)
+	ListProducts(ctx context.Context, filter domain.ProductFilter, cursor *domain.ProductCursor, limit int32) ([]domain.Product, error)
+	BatchGetProducts(ctx context.Context, ids []uuid.UUID) ([]domain.Product, error)
 }
+
 type CatalogService struct {
 	CatalogRepository CatalogRepository
 }
@@ -96,15 +102,18 @@ func (s *CatalogService) CreateProduct(ctx context.Context, p domain.Product) (u
 	p.Title = strings.TrimSpace(p.Title)
 	if p.Description != nil {
 		trimmed := strings.TrimSpace(*p.Description)
-		p.Description = new(trimmed)
+		if trimmed == "" {
+			p.Description = nil
+		} else {
+			if utf8.RuneCountInString(trimmed) > maxProductDescriptionLen {
+				return uuid.Nil, domain.ErrInvalidProductDescription
+			}
+			p.Description = &trimmed
+		}
 	}
 
 	if p.Title == "" || utf8.RuneCountInString(p.Title) > maxProductTitleLen {
 		return uuid.Nil, domain.ErrInvalidProductTitle
-	}
-
-	if utf8.RuneCountInString(*p.Description) > maxProductDescriptionLen {
-		return uuid.Nil, domain.ErrInvalidProductDescription
 	}
 
 	if p.Price.Amount < 0 || utf8.RuneCountInString(p.Price.Currency) > 3 {
@@ -117,4 +126,69 @@ func (s *CatalogService) CreateProduct(ctx context.Context, p domain.Product) (u
 	}
 
 	return productID, nil
+}
+
+func (s *CatalogService) GetProduct(ctx context.Context, id uuid.UUID) (domain.Product, error) {
+	const op = "service.GetProduct"
+	product, err := s.CatalogRepository.GetProduct(ctx, id)
+	if err != nil {
+		return domain.Product{}, fmt.Errorf("%s: %w", op, err)
+	}
+	return product, nil
+}
+
+// ListProducts возвращает страницу активных товаров и токен следующей страницы
+// (пустой, если страница последняя).
+func (s *CatalogService) ListProducts(
+	ctx context.Context,
+	filter domain.ProductFilter,
+	pageSize int32,
+	pageToken string,
+) ([]domain.Product, string, error) {
+	const op = "service.ListProducts"
+
+	pageSize = normalizePageSize(pageSize)
+
+	var cursor *domain.ProductCursor
+	if pageToken != "" {
+		c, err := decodeCursor(pageToken)
+		if err != nil {
+			return nil, "", domain.ErrInvalidPageToken
+		}
+		cursor = &c
+	}
+
+	// Берём на один товар больше: если он пришёл — значит, есть следующая страница.
+	products, err := s.CatalogRepository.ListProducts(ctx, filter, cursor, pageSize+1)
+	if err != nil {
+		return nil, "", fmt.Errorf("%s: %w", op, err)
+	}
+
+	var nextPageToken string
+	if len(products) > int(pageSize) {
+		products = products[:pageSize]
+		last := products[len(products)-1]
+		nextPageToken = encodeCursor(domain.ProductCursor{CreatedAt: last.CreatedAt, ID: last.ID})
+	}
+
+	return products, nextPageToken, nil
+}
+
+// BatchGetProducts возвращает найденные товары в любом статусе. Ненайденные id
+// просто отсутствуют в ответе — вызывающий сервис сам решает, что с этим делать.
+func (s *CatalogService) BatchGetProducts(ctx context.Context, ids []uuid.UUID) ([]domain.Product, error) {
+	const op = "service.BatchGetProducts"
+
+	if len(ids) == 0 {
+		return []domain.Product{}, nil
+	}
+	if len(ids) > maxBatchSize {
+		return nil, domain.ErrTooManyIDs
+	}
+
+	products, err := s.CatalogRepository.BatchGetProducts(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	return products, nil
 }

@@ -2,6 +2,7 @@ package render
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"google.golang.org/grpc/codes"
@@ -29,7 +30,13 @@ func (r *Response) NoContent() {
 }
 
 func (r *Response) GRPCError(err error) {
-	st := status.Convert(err)
+	// Клиенты оборачивают ошибки (fmt.Errorf("...: %w")), а status.Convert для
+	// обёрнутой ошибки кладёт в message весь текст обёртки. Достаём исходный статус.
+	st := status.New(codes.Unknown, err.Error())
+	var gs interface{ GRPCStatus() *status.Status }
+	if errors.As(err, &gs) {
+		st = gs.GRPCStatus()
+	}
 
 	var code int
 
@@ -44,8 +51,18 @@ func (r *Response) GRPCError(err error) {
 		code = http.StatusUnauthorized
 	case codes.PermissionDenied:
 		code = http.StatusForbidden
+	case codes.Unavailable:
+		code = http.StatusServiceUnavailable
+	case codes.DeadlineExceeded:
+		code = http.StatusGatewayTimeout
 	default:
 		code = http.StatusInternalServerError
+	}
+
+	// Текст внутренних ошибок наружу не отдаём: там могут быть детали БД и сети.
+	if code >= http.StatusInternalServerError {
+		r.Error(code, http.StatusText(code))
+		return
 	}
 
 	r.Error(code, st.Message())

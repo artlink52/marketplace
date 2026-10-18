@@ -6,8 +6,8 @@ CREATE TABLE orders (
     id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id          UUID        NOT NULL,
     status           order_status NOT NULL DEFAULT 'pending',
-    total_amount     BIGINT      NOT NULL,
-    currency         TEXT        NOT NULL DEFAULT 'RUB',
+    total_amount     BIGINT      NOT NULL CHECK (total_amount >= 0),
+    currency        CHAR(3)        NOT NULL DEFAULT 'RUB' CHECK (currency ~ '^[A-Z]{3}$'),
     cancel_reason    cancel_reason,
     idempotency_key  UUID        NOT NULL UNIQUE,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -19,7 +19,7 @@ CREATE TABLE order_item (
     order_id    UUID    NOT NULL REFERENCES orders (id) ON DELETE CASCADE,
     product_id  UUID    NOT NULL,
     quantity    INT     NOT NULL CHECK (quantity > 0),
-    unit_price  BIGINT  NOT NULL,
+    unit_price  BIGINT  NOT NULL CHECK (unit_price >= 0),
     currency    TEXT    NOT NULL DEFAULT 'RUB'
 );
 

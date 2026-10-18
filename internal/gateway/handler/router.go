@@ -20,18 +20,21 @@ func NewRouter(h Handlers, cfg config.Config) chi.Router {
 		r.Post("/auth/login", h.User.Login)
 		r.Post("/auth/register", h.User.Register)
 		r.Get("/categories", h.Catalog.ListCategories)
+		r.Get("/products", h.Catalog.ListProducts)
+		r.Get("/products/{id}", h.Catalog.GetProduct)
+
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Auth(cfg.JWTSecret))
 			r.Get("/users/{id}", h.User.GetUser)
 
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.RequireRole("admin"))
-				r.Post("/category", h.Catalog.CreateCategory)
+				r.Post("/categories", h.Catalog.CreateCategory)
 			})
 
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.RequireRole("seller"))
-				r.Post("/product", h.Catalog.CreateProduct)
+				r.Post("/products", h.Catalog.CreateProduct)
 			})
 		})
 	})

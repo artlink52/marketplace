@@ -28,22 +28,20 @@ type Order struct {
 	ID             uuid.UUID
 	UserID         uuid.UUID
 	Status         OrderStatus
-	TotalAmount    int64
-	Currency       string
-	CancelReason   CancelReason
+	Total          Money
+	CancelReason   *CancelReason
 	IdempotencyKey uuid.UUID
+	Items          []OrderItem
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
 
 type OrderItem struct {
-	ID         uuid.UUID
-	OrderID    uuid.UUID
-	OrderItems []OrderItem
-	ProductID  uuid.UUID
-	Quantity   int64
-	UnitPrice  int64
-	Currency   string
+	ID        uuid.UUID
+	OrderID   uuid.UUID
+	ProductID uuid.UUID
+	Quantity  int32
+	UnitPrice Money
 }
 
 type Money struct {
@@ -52,9 +50,12 @@ type Money struct {
 }
 
 var (
-	ErrOrderNotFound     = errors.New("order not found")
-	ErrDuplicateOrder    = errors.New("order already exists")
-	ErrInvalidTransition = errors.New("invalid status transition")
+	ErrOrderNotFound      = errors.New("order not found")
+	ErrEmptyOrder         = errors.New("empty order")
+	ErrInvalidQuantity    = errors.New("invalid quantity")
+	ErrProductNotFound    = errors.New("product not found")
+	ErrProductUnavailable = errors.New("product unavailable")
+	ErrInvalidTransition  = errors.New("invalid status transition")
 )
 
 var allowedTransitions = map[OrderStatus][]OrderStatus{

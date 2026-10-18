@@ -14,7 +14,7 @@ import (
 const createOrder = `-- name: CreateOrder :one
 INSERT INTO orders (user_id, total_amount, idempotency_key)
 VALUES ($1, $2, $3)
-ON CONFLICT (idempotency_key) DO NOTHING
+ON CONFLICT (user_id, idempotency_key) DO NOTHING
 RETURNING id, status
 `
 
@@ -43,19 +43,47 @@ type CreateOrderItemsParams struct {
 	UnitPrice int64
 }
 
+const getOrder = `-- name: GetOrder :one
+SELECT id, user_id, status, total_amount, currency, cancel_reason, idempotency_key, created_at, updated_at
+FROM orders
+WHERE id = $1
+`
+
+func (q *Queries) GetOrder(ctx context.Context, id uuid.UUID) (Order, error) {
+	row := q.db.QueryRow(ctx, getOrder, id)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Status,
+		&i.TotalAmount,
+		&i.Currency,
+		&i.CancelReason,
+		&i.IdempotencyKey,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getOrderByIdempotencyKey = `-- name: GetOrderByIdempotencyKey :one
 SELECT id, status
 FROM orders
-WHERE idempotency_key = $1
+WHERE user_id = $1 AND idempotency_key = $2
 `
+
+type GetOrderByIdempotencyKeyParams struct {
+	UserID         uuid.UUID
+	IdempotencyKey uuid.UUID
+}
 
 type GetOrderByIdempotencyKeyRow struct {
 	ID     uuid.UUID
 	Status OrderStatus
 }
 
-func (q *Queries) GetOrderByIdempotencyKey(ctx context.Context, idempotencyKey uuid.UUID) (GetOrderByIdempotencyKeyRow, error) {
-	row := q.db.QueryRow(ctx, getOrderByIdempotencyKey, idempotencyKey)
+func (q *Queries) GetOrderByIdempotencyKey(ctx context.Context, arg GetOrderByIdempotencyKeyParams) (GetOrderByIdempotencyKeyRow, error) {
+	row := q.db.QueryRow(ctx, getOrderByIdempotencyKey, arg.UserID, arg.IdempotencyKey)
 	var i GetOrderByIdempotencyKeyRow
 	err := row.Scan(&i.ID, &i.Status)
 	return i, err
@@ -81,4 +109,37 @@ func (q *Queries) InsertOutboxEvent(ctx context.Context, arg InsertOutboxEventPa
 		arg.Payload,
 	)
 	return err
+}
+
+const listOrderItems = `-- name: ListOrderItems :many
+SELECT id, order_id, product_id, quantity, unit_price, currency
+FROM order_item
+WHERE order_id = $1
+`
+
+func (q *Queries) ListOrderItems(ctx context.Context, orderID uuid.UUID) ([]OrderItem, error) {
+	rows, err := q.db.Query(ctx, listOrderItems, orderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OrderItem
+	for rows.Next() {
+		var i OrderItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrderID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.UnitPrice,
+			&i.Currency,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

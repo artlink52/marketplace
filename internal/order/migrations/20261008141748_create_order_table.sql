@@ -9,9 +9,11 @@ CREATE TABLE orders (
     total_amount     BIGINT      NOT NULL CHECK (total_amount >= 0),
     currency        CHAR(3)        NOT NULL DEFAULT 'RUB' CHECK (currency ~ '^[A-Z]{3}$'),
     cancel_reason    cancel_reason,
-    idempotency_key  UUID        NOT NULL UNIQUE,
+    idempotency_key  UUID        NOT NULL,
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT orders_user_id_idempotency_key_uniq UNIQUE (user_id, idempotency_key)
 );
 
 CREATE TABLE order_item (
@@ -20,7 +22,7 @@ CREATE TABLE order_item (
     product_id  UUID    NOT NULL,
     quantity    INT     NOT NULL CHECK (quantity > 0),
     unit_price  BIGINT  NOT NULL CHECK (unit_price >= 0),
-    currency    TEXT    NOT NULL DEFAULT 'RUB'
+    currency    CHAR(3)        NOT NULL DEFAULT 'RUB' CHECK (currency ~ '^[A-Z]{3}$')
 );
 
 CREATE TABLE outbox (
@@ -39,8 +41,10 @@ CREATE TABLE inbox (
 );
 
 CREATE INDEX idx_outbox_unpublished ON outbox (created_at) WHERE published_at IS NULL;
+CREATE INDEX idx_order_item_order_id ON order_item (order_id);
 
 -- +goose Down
+DROP INDEX idx_order_item_order_id;
 DROP INDEX idx_outbox_unpublished;
 DROP TABLE inbox;
 DROP TABLE outbox;

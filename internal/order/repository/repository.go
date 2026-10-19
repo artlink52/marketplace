@@ -9,6 +9,7 @@ import (
 	orderv1 "github.com/artlink52/marketplace/gen/go/order/v1"
 	"github.com/artlink52/marketplace/internal/order/domain"
 	dborder "github.com/artlink52/marketplace/internal/order/repository/sqlc"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/protobuf/proto"
@@ -93,6 +94,55 @@ func (r *OrderRepository) CreateOrder(ctx context.Context, order domain.Order) (
 	}
 
 	return order, true, nil
+}
+
+func (r *OrderRepository) GetOrder(ctx context.Context, id uuid.UUID) (*domain.Order, error) {
+	const op = "OrderRepository.GetOrder"
+	order, err := r.q.GetOrder(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrOrderNotFound
+		}
+		return nil, fmt.Errorf("%s: get order: %w", op, err)
+	}
+
+	rows, err := r.q.ListOrderItems(ctx, order.ID)
+	if err != nil {
+		return nil, fmt.Errorf("%s: list items: %w", op, err)
+	}
+
+	items := make([]domain.OrderItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, domain.OrderItem{
+			ID:        row.ID,
+			OrderID:   order.ID,
+			ProductID: row.ProductID,
+			Quantity:  row.Quantity,
+			UnitPrice: domain.Money{
+				Amount:   row.UnitPrice,
+				Currency: row.Currency,
+			},
+		})
+	}
+
+	return &domain.Order{
+		ID:           order.ID,
+		UserID:       order.UserID,
+		Status:       domain.OrderStatus(order.Status),
+		Total:        domain.Money{Amount: order.TotalAmount, Currency: order.Currency},
+		CancelReason: toDomainCancelReason(order.CancelReason),
+		Items:        items,
+		CreatedAt:    order.CreatedAt,
+		UpdatedAt:    order.UpdatedAt,
+	}, nil
+}
+
+func toDomainCancelReason(r *dborder.CancelReason) *domain.CancelReason {
+	if r == nil {
+		return nil
+	}
+	v := domain.CancelReason(*r)
+	return &v
 }
 
 func toOrderCreatedEvent(order domain.Order) *orderv1.OrderCreated {

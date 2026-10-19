@@ -24,6 +24,12 @@ const (
 	ReasonTimeout       CancelReason = "timeout"
 )
 
+type ProductInfo struct {
+	ID     uuid.UUID
+	Price  Money
+	Status string
+}
+
 type Order struct {
 	ID             uuid.UUID
 	UserID         uuid.UUID
@@ -56,6 +62,9 @@ var (
 	ErrProductNotFound    = errors.New("product not found")
 	ErrProductUnavailable = errors.New("product unavailable")
 	ErrInvalidTransition  = errors.New("invalid status transition")
+
+	ErrInvalidInput     = errors.New("invalid input")
+	ErrCurrencyMismatch = errors.New("currency mismatch")
 )
 
 var allowedTransitions = map[OrderStatus][]OrderStatus{

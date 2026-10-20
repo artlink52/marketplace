@@ -8,7 +8,6 @@ import (
 
 	usergrpc "github.com/artlink52/marketplace/internal/user/grpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 type App struct {
@@ -23,7 +22,6 @@ func New(
 ) *App {
 	gRPCServer := grpc.NewServer(grpc.UnaryInterceptor(timeoutInterceptor(timeout)))
 	usergrpc.RegisterUserServer(gRPCServer, userService)
-	reflection.Register(gRPCServer)
 	return &App{gRPCServer: gRPCServer, port: port}
 }
 

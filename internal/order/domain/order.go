@@ -65,6 +65,8 @@ var (
 
 	ErrInvalidInput     = errors.New("invalid input")
 	ErrCurrencyMismatch = errors.New("currency mismatch")
+
+	ErrInvalidOrderID = errors.New("invalid order ID")
 )
 
 var allowedTransitions = map[OrderStatus][]OrderStatus{

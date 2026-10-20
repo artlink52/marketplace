@@ -94,8 +94,20 @@ func (s *OrderService) CreateOrder(ctx context.Context, order domain.Order) (dom
 		return domain.Order{}, false, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return domain.Order{
-		ID:     result.ID,
-		Status: result.Status,
-	}, created, nil
+	return result, created, nil
+}
+
+func (s *OrderService) GetOrder(ctx context.Context, id uuid.UUID) (*domain.Order, error) {
+	const op = "OrderService.GetOrder"
+
+	if id == uuid.Nil {
+		return nil, domain.ErrInvalidOrderID
+	}
+
+	order, err := s.repo.GetOrder(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return order, nil
 }

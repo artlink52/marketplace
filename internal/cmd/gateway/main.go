@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -30,9 +29,7 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
 	select {
-	case err := <-errCh:
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	case <-errCh:
 	case <-stop:
 	}
 

@@ -87,6 +87,26 @@ services:
     ports:
       - "${CATALOG_PORT}:${CATALOG_PORT}"
 
+  order-service:
+    build:
+      context: .
+      dockerfile: internal/cmd/order/Dockerfile
+    container_name: marketplace-order-service
+    restart: unless-stopped
+    depends_on:
+      order-db:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+    environment:
+      ORDER_DATABASE_DSN: postgres://${ORDER_DB_USER}:${ORDER_DB_PASSWORD}@order-db:5432/${ORDER_DB_NAME}?sslmode=disable
+      ORDER_PORT: ${ORDER_PORT}
+      ORDER_TIMEOUT: ${ORDER_TIMEOUT:-10s}
+      ORDER_CATALOG_SERVICE_ADDR: catalog-service:${CATALOG_PORT}
+      ORDER_CATALOG_SERVICE_TIMEOUT: ${ORDER_CATALOG_SERVICE_TIMEOUT:-3s}
+    ports:
+      - "${ORDER_PORT}:${ORDER_PORT}"
+
   gateway:
     build:
       context: .
@@ -96,6 +116,7 @@ services:
     depends_on:
       - user-service
       - catalog-service
+      - order-service
     environment:
       GATEWAY_HTTP_PORT: ${GATEWAY_HTTP_PORT}
       GATEWAY_HTTP_TIMEOUT: ${GATEWAY_HTTP_TIMEOUT:-5s}
@@ -105,6 +126,8 @@ services:
       GATEWAY_USER_SERVICE_TIMEOUT: ${GATEWAY_USER_SERVICE_TIMEOUT:-3s}
       GATEWAY_CATALOG_SERVICE_ADDR: catalog-service:${CATALOG_PORT}
       GATEWAY_CATALOG_SERVICE_TIMEOUT: ${GATEWAY_CATALOG_SERVICE_TIMEOUT:-3s}
+      GATEWAY_ORDER_SERVICE_ADDR: order-service:${ORDER_PORT}
+      GATEWAY_ORDER_SERVICE_TIMEOUT: ${GATEWAY_ORDER_SERVICE_TIMEOUT:-4s}
     ports:
       - "${GATEWAY_HTTP_PORT}:${GATEWAY_HTTP_PORT}"
 

@@ -7,6 +7,7 @@ import (
 	orderv1 "github.com/artlink52/marketplace/gen/go/order/v1"
 	"github.com/artlink52/marketplace/internal/order/domain"
 	"github.com/google/uuid"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -21,10 +22,8 @@ type OrderServer struct {
 	orderService OrderService
 }
 
-func New(orderService OrderService) *OrderServer {
-	return &OrderServer{
-		orderService: orderService,
-	}
+func RegisterOrderServiceServer(server *grpc.Server, orderService OrderService) {
+	orderv1.RegisterOrderServiceServer(server, &OrderServer{orderService: orderService})
 }
 
 func (s *OrderServer) CreateOrder(ctx context.Context, req *orderv1.CreateOrderRequest) (*orderv1.CreateOrderResponse, error) {

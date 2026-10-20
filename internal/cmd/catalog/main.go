@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -28,9 +27,9 @@ func main() {
 
 	select {
 	case err := <-errCh:
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Printf("server error: %v", err)
 	case <-sigs:
+		log.Println("shutting down")
 	}
 	application.Stop()
 

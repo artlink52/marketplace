@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/artlink52/marketplace/internal/gateway/config"
 	"github.com/artlink52/marketplace/internal/gateway/handler/catalog"
+	"github.com/artlink52/marketplace/internal/gateway/handler/order"
 	"github.com/artlink52/marketplace/internal/gateway/handler/user"
 	"github.com/artlink52/marketplace/internal/gateway/middleware"
 	"github.com/go-chi/chi/v5"
@@ -11,6 +12,7 @@ import (
 type Handlers struct {
 	User    *user.Handler
 	Catalog *catalog.Handler
+	Order   *order.Handler
 }
 
 func NewRouter(h Handlers, cfg config.Config) chi.Router {
@@ -26,6 +28,7 @@ func NewRouter(h Handlers, cfg config.Config) chi.Router {
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.Auth(cfg.JWTSecret))
 			r.Get("/users/{id}", h.User.GetUser)
+			r.Post("/orders", h.Order.CreateOrder)
 
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.RequireRole("admin"))

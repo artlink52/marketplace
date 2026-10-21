@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/internal/catalog/migrations/20261010221825_create_catalog.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/internal/catalog/migrations/20261017210000_seed_categories.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/internal/catalog/migrations/20261017210100_seed_products.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/internal/catalog/repository/queries/catalog.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/internal/order/repository/queries/orders.sql" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/internal/user/migrations/20261004153952_seed_admin_user.sql" dialect="GenericSQL" />

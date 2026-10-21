@@ -1,11 +1,10 @@
-package order
+package orderclient
 
 import (
 	"context"
 	"fmt"
 
 	orderv1 "github.com/artlink52/marketplace/gen/go/order/v1"
-	"github.com/artlink52/marketplace/internal/order/domain"
 	"github.com/google/uuid"
 )
 
@@ -20,25 +19,40 @@ type OrderItem struct {
 	Quantity  int32
 }
 
-func (c *Client) CreateOrder(ctx context.Context, input CreateOrderInput) (domain.Order, error) {
+type CreateOrderResponse struct {
+	OrderID string `json:"order_id"`
+	Status  string `json:"status"`
+}
+
+func (c *Client) CreateOrder(ctx context.Context, input CreateOrderInput) (*CreateOrderResponse, error) {
 	resp, err := c.client.CreateOrder(ctx, &orderv1.CreateOrderRequest{
 		UserId:         input.UserID.String(),
 		Items:          toProtoItems(input.Items),
 		IdempotencyKey: input.IdempotencyKey,
 	})
 	if err != nil {
-		return domain.Order{}, fmt.Errorf("create order: %w", err)
+		return nil, fmt.Errorf("create order: %w", err)
 	}
 
-	id, err := uuid.Parse(resp.OrderId)
-	if err != nil {
-		return domain.Order{}, fmt.Errorf("parse order id: %w", err)
-	}
-
-	return domain.Order{
-		ID:     id,
-		Status: domain.OrderStatus(resp.Status),
+	return &CreateOrderResponse{
+		OrderID: resp.OrderId,
+		Status:  fromProtoStatus(resp.Status),
 	}, nil
+}
+
+func fromProtoStatus(s orderv1.OrderStatus) string {
+	switch s {
+	case orderv1.OrderStatus_ORDER_STATUS_PENDING:
+		return "pending"
+	case orderv1.OrderStatus_ORDER_STATUS_RESERVED:
+		return "reserved"
+	case orderv1.OrderStatus_ORDER_STATUS_CONFIRMED:
+		return "confirmed"
+	case orderv1.OrderStatus_ORDER_STATUS_CANCELLED:
+		return "cancelled"
+	default:
+		return "unspecified"
+	}
 }
 
 func toProtoItems(items []OrderItem) []*orderv1.RequestedItem {

@@ -17,6 +17,9 @@ type Config struct {
 
 	CatalogServiceAddr    string        `envconfig:"CATALOG_SERVICE_ADDR" required:"true"`
 	CatalogServiceTimeout time.Duration `envconfig:"CATALOG_SERVICE_TIMEOUT" default:"5s"`
+
+	OrderServiceAddr    string        `envconfig:"ORDER_SERVICE_ADDR" required:"true"`
+	OrderServiceTimeout time.Duration `envconfig:"ORDER_SERVICE_TIMEOUT" default:"5s"`
 }
 
 func New() (Config, error) {

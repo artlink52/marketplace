@@ -8,10 +8,12 @@ import (
 	"time"
 
 	catalogclient "github.com/artlink52/marketplace/internal/gateway/client/catalog"
+	orderclient "github.com/artlink52/marketplace/internal/gateway/client/order"
 	userclient "github.com/artlink52/marketplace/internal/gateway/client/user"
 	"github.com/artlink52/marketplace/internal/gateway/config"
 	"github.com/artlink52/marketplace/internal/gateway/handler"
 	cataloghandler "github.com/artlink52/marketplace/internal/gateway/handler/catalog"
+	orderhandler "github.com/artlink52/marketplace/internal/gateway/handler/order"
 	userhandler "github.com/artlink52/marketplace/internal/gateway/handler/user"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
@@ -32,13 +34,18 @@ func New(cfg config.Config) (*App, error) {
 
 	catalogClient, err := catalogclient.New(cfg.CatalogServiceAddr, cfg.CatalogServiceTimeout)
 	if err != nil {
-		_ = userClient.Close()
 		return nil, fmt.Errorf("create catalog client: %w", err)
+	}
+
+	orderClient, err := orderclient.New(cfg.OrderServiceAddr, cfg.OrderServiceTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("create order client: %w", err)
 	}
 
 	handlers := handler.Handlers{
 		User:    userhandler.New(userClient, cfg.JWTSecret, cfg.JWTTTL),
 		Catalog: cataloghandler.New(catalogClient),
+		Order:   orderhandler.New(orderClient),
 	}
 
 	r := chi.NewRouter()
